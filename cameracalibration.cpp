@@ -10,8 +10,8 @@
 using namespace std;
 using namespace cv;
 
-CameraCalibration::CameraCalibration()
-{
+CameraCalibration::CameraCalibration(){
+	counter = 0;
 }
 
 
@@ -295,9 +295,9 @@ void CameraCalibration::initDisparityImage(Size s){
     bm.state->preFilterCap = 31;
     bm.state->SADWindowSize = 9;
     bm.state->minDisparity = 0;
-	bm.state->numberOfDisparities = s.width/8;//32;
+	bm.state->numberOfDisparities = 32;
     bm.state->textureThreshold = 10;
-    bm.state->uniquenessRatio = 16;
+    bm.state->uniquenessRatio = 15;
     bm.state->speckleWindowSize = 100; // bylo 100
     bm.state->speckleRange = 32;
     bm.state->disp12MaxDiff = 1;
@@ -308,7 +308,7 @@ void CameraCalibration::initDisparityImage(Size s){
     sgbm.P1 = 8*sgbm.SADWindowSize*sgbm.SADWindowSize;
     sgbm.P2 = 32*sgbm.SADWindowSize*sgbm.SADWindowSize;
     sgbm.minDisparity = 0;
-    sgbm.numberOfDisparities = s.width/8;
+    sgbm.numberOfDisparities = 32;
     sgbm.uniquenessRatio = 15;
     sgbm.speckleWindowSize = 100;
     sgbm.speckleRange = 32;
@@ -318,45 +318,36 @@ void CameraCalibration::initDisparityImage(Size s){
 }
 
 
-void CameraCalibration::showDisparityImage(cv::Mat & img1, cv::Mat & img2, int type, bool showCloud){
+void CameraCalibration::showDisparityImage(Mat & img1, Mat & img2, int type, bool showCloud){
 	
 	Mat disp, disp8;
+	Mat img1r, img2r;
+	remap(img1, img1r, rmap[0][0], rmap[0][1], INTER_LINEAR);
+	remap(img2, img2r, rmap[1][0], rmap[1][1], INTER_LINEAR);
 
 	if(type == 0){
-		Mat img1r, img2r;
-		remap(img1, img1r, rmap[0][0], rmap[0][1], INTER_LINEAR);
-		remap(img2, img2r, rmap[1][0], rmap[1][1], INTER_LINEAR);
-
 		//imshow("im1", img1r);
 		//imshow("im2", img2r);
 
-		
 		bm(img1r, img2r, disp);
-		//bm(img1, img2, disp);
 		disp.convertTo(disp8, CV_8U, 255.0/(bm.state->numberOfDisparities*16.));
 		imshow("disparity", disp8);
+	}
+	else if(type == 1){
 
-
-	}else if(type == 1){
 		sgbm(img1, img2, disp);
 		disp.convertTo(disp8, CV_8U, 255/(sgbm.numberOfDisparities*16.));
-		imshow("disparity2", disp8);
-	}else{
+		imshow("disparity", disp8);
 	}
 
 	if(showCloud){
 		fflush(stdout);
         Mat xyz;
         reprojectImageTo3D(disp, xyz, Q, true);
-
-		const double max_z = 1.0e4;
-		for(int y = 0; y < xyz.rows; y++){
-			for(int x = 0; x < xyz.cols; x++){
-				Vec3f point = xyz.at<Vec3f>(y, x);
-				if(fabs(point[2] - max_z) < FLT_EPSILON || fabs(point[2]) > max_z) continue;
-				printf("%f %f %f\n", point[0], point[1], point[2]);
-			}
-		}
+		saveXYZ("cloud", xyz);
+		if(XYZ.empty())		
+			XYZ.release();
+		XYZ = xyz.clone();
 	}
 }
 
@@ -405,4 +396,24 @@ void CameraCalibration::getExtrinsics(Mat & r, Mat & t, Mat & r1, Mat & r2, Mat 
 	P1.copyTo(p1);
 	P2.copyTo(p2);
 	Q.copyTo(q);
+}
+
+
+void CameraCalibration::saveXYZ(const char* filename, const Mat& mat){
+    const double max_z = 1.0e4;
+	char nr[4];
+	FILE* fp = fopen(string(filename).append(string(itoa(counter, nr, 10))).c_str(), "wt");
+
+    for(int y = 0; y < mat.rows; y++){
+        for(int x = 0; x < mat.cols; x++){
+
+            Vec3f point = mat.at<Vec3f>(y, x);
+            if(fabs(point[2] - max_z) < FLT_EPSILON || fabs(point[2]) > max_z) continue;
+            fprintf(fp, "%f %f %f\n", point[0], point[1], point[2]);
+        }
+    }
+
+	cout << "xyz saved" << endl;
+    fclose(fp);
+	counter++;
 }
