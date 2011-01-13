@@ -12,7 +12,7 @@ public:
 	void resize(int w, int h);
 
 	void moveFlat(int direction);
-	void orientMe(float ang);
+	void rotate(int xdiff, int ydiff);
 
 private:
 
