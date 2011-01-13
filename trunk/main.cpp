@@ -36,6 +36,7 @@ int g_lastX = -1;
 int g_lastY = -1;
 bool g_leftButtonPressed = false;
 bool g_rightButtonPressed = false;
+int g_window = -1;
 
 
 
@@ -54,6 +55,7 @@ CameraCalibration g_cameraCalibrationDevice;
 bool g_calibrate = false;
 bool g_hasToCalibrate = false;
 bool g_showDisparity = false;
+int g_disp = 0;
 bool g_showCloud = false;
 
 int g_counter = 1;
@@ -61,6 +63,7 @@ int g_maxPairs = 15, g_samplesTime = 20;
 
 vector<Mat> g_camImages;
 Mat g_blackOne(CAM_SIZE, CV_8U, Scalar(0));
+char g_clicked = -1;
 
 
 
@@ -88,29 +91,36 @@ void initOpenCV(){
 		//exit(1);
 	}
 
-	namedWindow("g_camLeft");
-	namedWindow("g_camRight");
+	namedWindow("camLeft");
+	namedWindow("camRight");
 
 	cout << "Obsluga programu:"<<endl;
 	cout << " c - kalibracja"<<endl;
 	cout << " q - wyjscie"<<endl;
+	cout << " d - disparity" << endl;
+	cout << "     0 - SM/SGBM" << endl;
+	cout << " x - chmura punktow"<< endl;
 
 	g_hasToCalibrate = !g_cameraCalibrationDevice.hasCalibrationData();
+	
 }
 
 
 bool updateOpenCV(){
-	char c;
-	if((c = waitKey(30) ) == 'q' || c == 'Q')
-		return false;
+	char c = waitKey(1);
+	//if((c = waitKey(1) ) == 'q' || c == 'Q')
+	//	return false;
 	// rozpoczynamy kalibracje
-	else if(!g_calibrate && (c == 'c' || c == 'C')){
+	if(!g_calibrate && (c == 'c' || c == 'C')){
 		g_calibrate = true;
 	}else if(!g_calibrate && (c == 'd' || c == 'D')){
 		g_showDisparity = !g_showDisparity;
 		g_cameraCalibrationDevice.initDisparityImage(CAM_SIZE);
 	}else if(g_showDisparity && (c == 'x' || c == 'X')){
 		g_showCloud = !g_showCloud;
+	}else if(g_showDisparity && (c == '0')){
+		g_disp = (g_disp+1)%2;
+		cout << (g_disp == 0 ? "SM algorithm" : "SGBM algorithm") << endl;
 	}
 		
 	if(g_camLeft.hasNextFrame() && g_camRight.hasNextFrame()){
@@ -120,8 +130,8 @@ bool updateOpenCV(){
 		Mat mat1 = Mat(frame1);
 		Mat mat2 = Mat(frame2);
 
-		imshow("g_camLeft", mat1);
-		imshow("g_camRight", mat2);
+		imshow("camLeft", mat1);
+		imshow("camRight", mat2);
 
 		// kalibracja
 		if(g_calibrate){
@@ -133,15 +143,15 @@ bool updateOpenCV(){
 				g_camImages.push_back(Mat(grey2));
 				g_camImages.push_back(Mat(grey1));
 				cout << g_counter/g_samplesTime << endl;
-				imshow("g_camLeft", g_blackOne);
-				imshow("g_camRight", g_blackOne);
+				imshow("camLeft", g_blackOne);
+				imshow("camRight", g_blackOne);
 			}
 				
 			// no to mozemy kalibrowac
 			if(g_counter == g_maxPairs*g_samplesTime){
-				destroyWindow("g_camLeft");
-				destroyWindow("g_camRight");
-				g_cameraCalibrationDevice.calibrate(g_camImages, Size(9,6), 1.0f);
+				destroyWindow("camLeft");
+				destroyWindow("camRight");
+				g_cameraCalibrationDevice.calibrate(g_camImages, Size(11,8), 1.0f);
 				g_calibrate = false;
 				g_hasToCalibrate = false;
 			}
@@ -153,7 +163,8 @@ bool updateOpenCV(){
 			Mat grey1, grey2;
 			cvtColor(mat1, grey1, CV_BGR2GRAY);
 			cvtColor(mat2, grey2, CV_BGR2GRAY);
-			g_cameraCalibrationDevice.showDisparityImage(grey1, grey2, 1, g_showCloud);
+
+			g_cameraCalibrationDevice.showDisparityImage(grey1, grey2, g_disp, g_showCloud);
 			g_showCloud = false;
 		}
 	}
@@ -176,8 +187,8 @@ void initOpenGL(){
 	glutInitWindowPosition(500,480);
 	glutInitWindowSize(400, 400);
 	
-	glutCreateWindow("3d scene");
-	
+	g_window = glutCreateWindow("3d scene");
+
 	scene.init(400, 400);
 
 	glutDisplayFunc(drawScene);
@@ -193,14 +204,17 @@ void handleResize(int w, int h){
 }
 
 void drawScene(){
+	Mat m = g_cameraCalibrationDevice.getPointCloud();
+	if(!m.empty()){
+		scene.setPointCloud(m);
+	}
 	scene.draw();
 }
 
 void update(int value){
 
 	if(!updateOpenCV()){
-		closeOpenCV();
-		exit(0);
+		handleKeypress(27, 0, 0);
 	}
 
 	glutPostRedisplay();
@@ -210,6 +224,7 @@ void update(int value){
 void handleKeypress(unsigned char key, int x, int y){
 	switch (key){
 		case 27:
+			closeOpenCV();
 			exit(0);
 			break;
 	}

@@ -6,7 +6,7 @@
 #include <cmath>
 #include <GL/glut.h>
 
-
+using namespace cv;
 
 static float angleX=0.0, angleY = 0.0, ratio;
 static float x=0.0f,y=0.0f,z=5.0f;
@@ -14,6 +14,7 @@ static float lx=0.0f,ly=0.0f,lz=-1.0f;
 
 
 Simple3DScene::Simple3DScene(){
+	
 }
 
 
@@ -63,19 +64,44 @@ void Simple3DScene::init(int w, int h){
 void Simple3DScene::draw(){
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//glTranslatef(0.0f, 0.0f, -5.0f); // Push eveything 5 units back into the scene, otherwise we won't see the primitive  
-	//glTranslatef(0.0f, 2.0f, 0.0f); // Translate our object along the y axis  
   
 	glPushMatrix();
 	glTranslatef(0.0f, 0.0f, -5.0f);
 	glRotatef(angleX, 0.0f, 1.0f, 0.0f);
 	glRotatef(angleY, 1.0f, 0.0f, 0.0f); 
-	glutSolidCube(2.0f); // Render the primitive  
+	
+	drawPointCloud();
+
+	//glutSolidCube(2.0f); // Render the primitive  
 	glPopMatrix();
 
 	glutSwapBuffers();
+}
 
+
+void Simple3DScene::drawPointCloud(){
+	if(cloud.empty()){
+		return;
+	}
+
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glPointSize(2.0f);
+	glScalef(-1.0, -1.0, 1.0/100.0);
+	
+	const double max_z = 1.0e4;
+	glBegin(GL_POINTS);
+	for(int y = 0; y < cloud.rows; y++){
+        for(int x = 0; x < cloud.cols; x++){
+
+            Vec3f point = cloud.at<Vec3f>(y, x);
+            if(fabs(point[2] - max_z) < FLT_EPSILON || fabs(point[2]) > max_z) 
+				continue;
+			
+			glVertex3f(point[0],point[1],point[2]);
+			
+        }
+    }
+	glEnd();
 }
 
 
@@ -96,6 +122,12 @@ void Simple3DScene::rotate(int xdiff, int ydiff){
 	angleY += (float)ydiff/2.0f;
 }
 
+
+void Simple3DScene::setPointCloud(Mat & mat){
+	if(!cloud.empty())
+		cloud.release();
+	cloud = mat.clone();
+}
 
 
 void Simple3DScene::resize(int w, int h){

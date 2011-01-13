@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cv.h>
+#include <cxcore.h>
 
 class Simple3DScene
 {
@@ -14,7 +16,12 @@ public:
 	void moveFlat(int direction);
 	void rotate(int xdiff, int ydiff);
 
-private:
+	void setPointCloud(cv::Mat & mat);
 
+private:
+	void drawPointCloud();
+
+
+	cv::Mat cloud;
 };
 
