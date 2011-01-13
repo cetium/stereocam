@@ -8,8 +8,8 @@
 
 
 
-static float angle=0.0,ratio;
-static float x=0.0f,y=1.75f,z=5.0f;
+static float angleX=0.0, angleY = 0.0, ratio;
+static float x=0.0f,y=0.0f,z=5.0f;
 static float lx=0.0f,ly=0.0f,lz=-1.0f;
 
 
@@ -63,48 +63,17 @@ void Simple3DScene::init(int w, int h){
 void Simple3DScene::draw(){
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	/*
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(x, y, z, 
-		  	x + lx,y + ly,z + lz,
-			0.0f,1.0f,0.0f);
-	*/
-	std::cout << x <<std::endl;
 
-	glBegin(GL_POINTS); //Begin drawing points
+	//glTranslatef(0.0f, 0.0f, -5.0f); // Push eveything 5 units back into the scene, otherwise we won't see the primitive  
+	//glTranslatef(0.0f, 2.0f, 0.0f); // Translate our object along the y axis  
   
-	// a point
-	glVertex3f(-0.75f, -0.25f, -5.0f);
-  
-	glEnd();
-  
-	glBegin(GL_LINES); //Begin drawing lines
-  
-	// 2 end points on line
-	glVertex3f(-1.0f, 1.0f, -5.0f);
-	glVertex3f(1.0f, -1.0f, -5.0f);
-  
-	glEnd();
-  
-	glBegin(GL_TRIANGLES);
-  
-	// 3 corner points on triangle
-	glVertex3f(1.5f, 1.0f, -5.0f);
-	glVertex3f(1.0f, 0.0f, -5.0f);
-	glVertex3f(0.5f, 1.0f, -5.0f);
-  
-	glEnd();
-  
-	glBegin(GL_QUADS); //Begin drawing quadrilaterals
-  
-	// 4 corner points on square
-	glVertex3f(-0.5f, -2.0f, -5.0f);
-	glVertex3f(0.5f, -2.0f, -5.0f);
-	glVertex3f(0.5f, -1.0f, -5.0f);
-	glVertex3f(-0.5f, -1.0f, -5.0f);
- 
-	glEnd();
+	glPushMatrix();
+	glTranslatef(0.0f, 0.0f, -5.0f);
+	glRotatef(angleX, 0.0f, 1.0f, 0.0f);
+	glRotatef(angleY, 1.0f, 0.0f, 0.0f); 
+	glutSolidCube(2.0f); // Render the primitive  
+	glPopMatrix();
+
 	glutSwapBuffers();
 
 }
@@ -120,16 +89,13 @@ void Simple3DScene::moveFlat(int direction) {
 			  0.0f,1.0f,0.0f);
 }
 
-void Simple3DScene::orientMe(float ang) {
-	angle += ang;
 
-	lx = sin(ang);
-	lz = -cos(ang);
-	glLoadIdentity();
-	gluLookAt(x, y, z, 
-		      x + lx,y + ly,z + lz,
-			  0.0f,1.0f,0.0f);
+
+void Simple3DScene::rotate(int xdiff, int ydiff){
+	angleX += (float)xdiff/2.0f;
+	angleY += (float)ydiff/2.0f;
 }
+
 
 
 void Simple3DScene::resize(int w, int h){
