@@ -23,6 +23,7 @@ public:
 
 	cv::Mat & getPointCloud(){	return XYZ; }
 
+	bool isInitialized(){	return initialized; }
 
 private:
 	void saveXYZ(const char* filename, const cv::Mat& mat);
@@ -39,5 +40,7 @@ private:
 	cv::Mat XYZ;
 
 	int counter;
+
+	bool initialized;
 };
 
