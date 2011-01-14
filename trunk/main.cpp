@@ -107,7 +107,15 @@ void initOpenCV(){
 
 
 bool updateOpenCV(){
-	char c = waitKey(1);
+	char c = 0;// = waitKey(1);
+
+	if(g_clicked > 0){
+		c = g_clicked;
+		g_clicked = -1;
+	}else{
+		c = waitKey(20);
+	}
+	
 	//if((c = waitKey(1) ) == 'q' || c == 'Q')
 	//	return false;
 	// rozpoczynamy kalibracje
@@ -115,7 +123,8 @@ bool updateOpenCV(){
 		g_calibrate = true;
 	}else if(!g_calibrate && (c == 'd' || c == 'D')){
 		g_showDisparity = !g_showDisparity;
-		g_cameraCalibrationDevice.initDisparityImage(CAM_SIZE);
+		if(!g_cameraCalibrationDevice.isInitialized())
+			g_cameraCalibrationDevice.initDisparityImage(CAM_SIZE);
 	}else if(g_showDisparity && (c == 'x' || c == 'X')){
 		g_showCloud = !g_showCloud;
 	}else if(g_showDisparity && (c == '0')){
@@ -165,7 +174,11 @@ bool updateOpenCV(){
 			cvtColor(mat2, grey2, CV_BGR2GRAY);
 
 			g_cameraCalibrationDevice.showDisparityImage(grey1, grey2, g_disp, g_showCloud);
-			g_showCloud = false;
+
+			if(g_showCloud){
+				g_showDisparity = false;
+				g_showCloud = false;
+			}
 		}
 	}
 
@@ -185,11 +198,11 @@ void closeOpenCV(){
 void initOpenGL(){
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowPosition(500,480);
-	glutInitWindowSize(400, 400);
+	glutInitWindowSize(640, 480);
 	
 	g_window = glutCreateWindow("3d scene");
 
-	scene.init(400, 400);
+	scene.init(640, 480);
 
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(handleKeypress);
@@ -227,6 +240,8 @@ void handleKeypress(unsigned char key, int x, int y){
 			closeOpenCV();
 			exit(0);
 			break;
+		default:
+			g_clicked = key;
 	}
 }
 

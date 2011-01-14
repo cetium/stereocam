@@ -12,6 +12,7 @@ using namespace cv;
 
 CameraCalibration::CameraCalibration(){
 	counter = 0;
+	initialized = false;
 }
 
 
@@ -148,6 +149,7 @@ bool CameraCalibration::calibrate(vector<Mat> & camImages, Size boardSize, float
 								TermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5),
 								CV_CALIB_FIX_ASPECT_RATIO +
 								CV_CALIB_ZERO_TANGENT_DIST +
+								//CV_CALIB_FIX_FOCAL_LENGTH +
 								CV_CALIB_SAME_FOCAL_LENGTH +
 								CV_CALIB_RATIONAL_MODEL +
 								CV_CALIB_FIX_K3 + CV_CALIB_FIX_K4 + CV_CALIB_FIX_K5);
@@ -293,28 +295,29 @@ void CameraCalibration::initDisparityImage(Size s){
     bm.state->roi2 = roi2;
 	bm.state->preFilterSize = 21;
     bm.state->preFilterCap = 31;
-    bm.state->SADWindowSize = 9;
+    bm.state->SADWindowSize = 11;
     bm.state->minDisparity = 0;
 	bm.state->numberOfDisparities = 32;
-    bm.state->textureThreshold = 10;
-    bm.state->uniquenessRatio = 15;
-    bm.state->speckleWindowSize = 100; // bylo 100
+    bm.state->textureThreshold = 1;
+    bm.state->uniquenessRatio = 5;
+    bm.state->speckleWindowSize = 200; // bylo 100
     bm.state->speckleRange = 32;
-    bm.state->disp12MaxDiff = 1;
+    bm.state->disp12MaxDiff = 2;
 	
 	
-	sgbm.preFilterCap = 63;
-    sgbm.SADWindowSize = 9;
+	sgbm.preFilterCap = 16;
+    sgbm.SADWindowSize = 3;
     sgbm.P1 = 8*sgbm.SADWindowSize*sgbm.SADWindowSize;
     sgbm.P2 = 32*sgbm.SADWindowSize*sgbm.SADWindowSize;
     sgbm.minDisparity = 0;
     sgbm.numberOfDisparities = 32;
-    sgbm.uniquenessRatio = 15;
-    sgbm.speckleWindowSize = 100;
+    sgbm.uniquenessRatio = 5;
+    sgbm.speckleWindowSize = 200;
     sgbm.speckleRange = 32;
     sgbm.disp12MaxDiff = 2;
     sgbm.fullDP = false;
 	
+	initialized = true;
 }
 
 
