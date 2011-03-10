@@ -293,29 +293,29 @@ void CameraCalibration::initDisparityImage(Size s){
 
 	bm.state->roi1 = roi1;
     bm.state->roi2 = roi2;
-	bm.state->preFilterSize = 21;
+	bm.state->preFilterSize = 11;
     bm.state->preFilterCap = 31;
-    bm.state->SADWindowSize = 11;
+    bm.state->SADWindowSize = 21;
     bm.state->minDisparity = 0;
 	bm.state->numberOfDisparities = 32;
-    bm.state->textureThreshold = 1;
-    bm.state->uniquenessRatio = 5;
-    bm.state->speckleWindowSize = 200; // bylo 100
-    bm.state->speckleRange = 32;
-    bm.state->disp12MaxDiff = 2;
+    bm.state->textureThreshold = 5;
+    bm.state->uniquenessRatio = 10;
+    bm.state->speckleWindowSize = 100; // bylo 100
+    bm.state->speckleRange = 16;
+    bm.state->disp12MaxDiff = 1;
 	
 	
-	sgbm.preFilterCap = 16;
-    sgbm.SADWindowSize = 3;
-    sgbm.P1 = 8*sgbm.SADWindowSize*sgbm.SADWindowSize;
-    sgbm.P2 = 32*sgbm.SADWindowSize*sgbm.SADWindowSize;
+	sgbm.preFilterCap = 31;
+    sgbm.SADWindowSize = 11;
+    sgbm.P1 = 2*8*sgbm.SADWindowSize*sgbm.SADWindowSize;
+    sgbm.P2 = 2*32*sgbm.SADWindowSize*sgbm.SADWindowSize;
     sgbm.minDisparity = 0;
     sgbm.numberOfDisparities = 32;
-    sgbm.uniquenessRatio = 5;
-    sgbm.speckleWindowSize = 200;
-    sgbm.speckleRange = 32;
+    sgbm.uniquenessRatio = 1;
+    sgbm.speckleWindowSize = 400;
+    sgbm.speckleRange = 16;
     sgbm.disp12MaxDiff = 2;
-    sgbm.fullDP = false;
+    sgbm.fullDP = true;
 	
 	initialized = true;
 }
@@ -346,8 +346,11 @@ void CameraCalibration::showDisparityImage(Mat & img1, Mat & img2, int type, boo
 	if(showCloud){
 		fflush(stdout);
         Mat xyz;
-        reprojectImageTo3D(disp, xyz, Q, true);
+        reprojectImageTo3D(disp, xyz, Q, false);
+		//Mat perspectiveXYZ;
+		//perspectiveTransform(xyz, perspectiveXYZ, Q);
 		saveXYZ("cloud", xyz);
+		//saveXYZ("perspective", perspectiveXYZ);
 		if(XYZ.empty())		
 			XYZ.release();
 		XYZ = xyz.clone();
