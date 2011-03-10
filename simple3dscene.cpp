@@ -86,7 +86,7 @@ void Simple3DScene::drawPointCloud(){
 
 	glColor3f(1.0f, 0.0f, 0.0f);
 	glPointSize(2.0f);
-	glScalef(-1.0, -1.0, 1.0/100.0);
+	glScalef(-1.0/100.0, -1.0/100.0, 1.0/255.0);
 	
 	const double max_z = 1.0e4;
 	glBegin(GL_POINTS);
