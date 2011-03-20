@@ -331,7 +331,7 @@ void CameraCalibration::showDisparityImage(Mat & img1, Mat & img2, int type, boo
 	if(type == 0){
 		//imshow("im1", img1r);
 		//imshow("im2", img2r);
-
+	
 		bm(img1r, img2r, disp);
 		disp.convertTo(disp8, CV_8U, 255.0/(bm.state->numberOfDisparities*16.));
 		imshow("disparity", disp8);
