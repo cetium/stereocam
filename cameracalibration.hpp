@@ -42,5 +42,7 @@ private:
 	int counter;
 
 	bool initialized;
+
+
 };
 

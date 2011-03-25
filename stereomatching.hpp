@@ -22,7 +22,7 @@ public:
 	void		changeProperties();
 	
 	std::vector<Property *> properties;
-
+	int			id;
 
 	// setters
 	void		setEveryFrameGet(int value);

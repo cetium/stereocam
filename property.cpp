@@ -32,14 +32,6 @@ int	Property::getValue(){
 	return value;
 }
 
-int	Property::getMinValue(){
-	return minValue;
-}
-
-int	Property::getMaxValue(){
-	return maxValue;
-}
-
 int	Property::getDefaultValue(){
 	return defaultValue;
 }
@@ -77,14 +69,6 @@ void Property::setValueToChangeDown(){
 void Property::setValueToDefault(){
 	valueToChange = defaultValue;
 	changed = true;
-}
-
-void Property::setMinValue(int newMin){
-	minValue = newMin;
-}
-
-void Property::setMaxValue(int newMax){
-	maxValue = maxValue;
 }
 
 void Property::setTableValues(int * values){
