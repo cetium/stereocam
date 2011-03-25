@@ -51,13 +51,13 @@ void StereoMatchingSGBM::init(){
 	max = 8;
 	int defValues[8] = {1, 3, 5, 7, 9, 11, 21, 31};
 
-	int * values = new int[max];
+	int * values2 = new int[max];
 	for(int i = 0; i < max; ++i)
-		values[i] = defValues[i];
+		values2[i] = defValues[i];
 
 	prop->minValue = 0;
 	prop->maxValue = max-1;
-	prop->tableValues = values;
+	prop->tableValues = values2;
 	properties.push_back(prop);
 
 	
@@ -84,10 +84,10 @@ void StereoMatchingSGBM::init(){
 
 	//6
 	prop = new Property("Speckle range", 16, Property::DISCRETE);
-	int max = 4;
-	int * values = new int[max];
+	max = 4;
+	int * values3 = new int[max];
 	for(int i = 0; i < max; ++i)
-		values[i] = 16*i;
+		values3[i] = 16*i;
 
 	prop->minValue = 0;
 	prop->maxValue = max-1;

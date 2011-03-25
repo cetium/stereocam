@@ -6,7 +6,7 @@
 #include "stereomatching.hpp"
 #include "property.hpp"
 
-class StereoMatchingBM: StereoMatching{
+class StereoMatchingBM: public StereoMatching{
 
 public:
 
