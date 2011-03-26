@@ -8,11 +8,14 @@ using namespace cv;
 using namespace std;
 
 MainThread::MainThread(): QThread(){
-
+	//blackOne = Mat(Settings::CAM_SIZE, CV_8U, Scalar(0));
+	blackOne = cvCreateImage(Settings::CAM_SIZE, CV_8U, 3);
+	cvZero(blackOne);
 }
 
 
 MainThread::~MainThread(){
+	cvReleaseImage(&blackOne);
 	delete camLeft;
 	delete camRight;
 }
@@ -56,12 +59,14 @@ bool MainThread::initCameras(){
 bool MainThread::initModules(){
 	stereoModule.init(&settings, mainDialog);
 	calibModule.init(&settings, mainDialog, Size(11, 8));
-	processModule.init(&settings);
+	processModule.init(&settings, mainDialog);
 	return true;
 }
 
 
 bool MainThread::initDialogs(){
+	leftImage = new ImageDialog(mainDialog, "Obraz z kamery 1", Size(640, 480), Point(220, 20));
+	rightImage = new ImageDialog(mainDialog, "Obraz z kamery 2", Size(640, 480), Point(860, 20));
 	return true;
 }
 
@@ -82,12 +87,22 @@ bool MainThread::opencvMain(){
 
 		Mat mat1 = Mat(frame1);
 		Mat mat2 = Mat(frame2);
+
+		leftImage->showImage(frame1);
+		rightImage->showImage(frame2);
 	}
 
+	if(settings.state == settings.BEFORE_CALIBRATION){
+		return true;
+	}
 
 	if(settings.state == settings.CALIBRATION){
 		// kalibracja kamer
-		calibModule.addImages(frame1, frame2);
+		
+		if(calibModule.addImages(frame1, frame2)){
+			leftImage->showImage(blackOne);
+			rightImage->showImage(blackOne);
+		}
 		return true;
 	}
 	
