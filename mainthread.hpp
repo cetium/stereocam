@@ -18,6 +18,7 @@
 #include "calibrationmodule.hpp"
 #include "processingmodule.hpp"
 #include "closedialog.hpp"
+#include "imagedialog.hpp"
 
 
 class MainThread: public QThread{
@@ -42,7 +43,7 @@ private:
 	bool opencvMain();
 
 	CloseDialog * mainDialog;
-	QDialog * images;
+	//QDialog * images;
 
 	// kamery
 	CameraDevice * camLeft;
@@ -56,6 +57,11 @@ private:
 	// ustawienia
 	Settings settings;
 
+	// okienka obrazow
+	ImageDialog * leftImage;
+	ImageDialog * rightImage;
+
+	IplImage * blackOne;
 };
 
 

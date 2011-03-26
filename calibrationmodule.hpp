@@ -23,7 +23,7 @@ public:
 	~CalibrationModule();
 
 	void init(Settings * sets, QDialog * dial, cv::Size theBoardSize, int pairs = 15);
-	void addImages(IplImage * frame1, IplImage * frame2);
+	bool addImages(IplImage * frame1, IplImage * frame2);
 
 private slots:
 	void startCalibration();

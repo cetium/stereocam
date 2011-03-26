@@ -1,4 +1,5 @@
 #include "calibrationmodule.hpp"
+#include "imagedialog.hpp"
 
 #include <sstream>
 #include <QVBoxLayout>
@@ -24,7 +25,6 @@ void CalibrationModule::init(Settings * sets, QDialog * dial, Size theBoardSize,
 	maxPairs = pairs;
 	boardSize = theBoardSize;
 
-	blackOne = Mat(Settings::CAM_SIZE, CV_8U, Scalar(0));
 	dialog = dial;
 	initWindow();
 }
@@ -63,9 +63,10 @@ void CalibrationModule::loadCalibration(){
 }
 
 
+// zwraca - czy dodalo do kolejki
+bool CalibrationModule::addImages(IplImage * frame1, IplImage * frame2){
 
-void CalibrationModule::addImages(IplImage * frame1, IplImage * frame2){
-
+	bool has = false;
 	if(counter % samplesTime == 0){
 
 		IplImage * grey1 = cvCreateImage(cvGetSize(frame1), 8, 1);
@@ -74,20 +75,22 @@ void CalibrationModule::addImages(IplImage * frame1, IplImage * frame2){
 		cvCvtColor(frame1, grey1, CV_BGR2GRAY);
 		cvCvtColor(frame2, grey2, CV_BGR2GRAY);
 
-		imshow(Settings::WIN1, blackOne);
-		imshow(Settings::WIN2, blackOne);
-
 		camImages.push_back(grey1);
 		camImages.push_back(grey2);
+
+		has = true;
 	}
 	++counter;
 
 	if(counter*samplesTime == maxPairs){
 		if(calibrate())
-			settings->state = Settings::AFTER_CALIBRATION;
+			settings->state = Settings::MATCH;
 		else
 			clearCalibrationData();
+		return false;
 	}
+
+	return has;
 }
 
 void CalibrationModule::clearCalibrationData(){
@@ -111,6 +114,8 @@ bool CalibrationModule::calibrate(){
 
 	imagePoints[0].resize(numImages);
 	imagePoints[1].resize(numImages);
+
+	ImageDialog * calibratingDialog = new ImageDialog(0, "kalibracja", Settings::CAM_SIZE, Point(300, 300));
 
 	// for every pair of images
 	for(i = j = 0; i < numImages; ++i){
@@ -149,7 +154,8 @@ bool CalibrationModule::calibrate(){
 			Mat cimg;
 			cvtColor(img, cimg, CV_GRAY2BGR);
 			drawChessboardCorners(cimg, boardSize, corners, found);
-			imshow(Settings::CORNERS, cimg);
+			calibratingDialog->showImage(cimg);
+
 			char c = (char)waitKey(1000);
 
 			// wyjscie z programu, aby bylo mozliwe
@@ -172,12 +178,10 @@ bool CalibrationModule::calibrate(){
 	float squareSize = 1.0;
 	numImages = j;
 	if(numImages < 2){
+		// tu - jakis status
 		waitKey(1000);
-		destroyWindow(Settings::CORNERS);
+		delete calibratingDialog;
 		return false;
-	}else{
-		waitKey(1000);
-		destroyWindow(Settings::CORNERS);
 	}
 
 	imagePoints[0].resize(numImages);
@@ -264,6 +268,7 @@ bool CalibrationModule::calibrate(){
 	bool isVerticalStereo = fabs(P2.at<double>(1, 3)) > fabs(P2.at<double>(0, 3));
 	if(isVerticalStereo){
 		//settings->overlay = "Blad: odczytalo jako pionowe ulozenie kamer";
+		delete calibratingDialog;
 		return false;
 	}
 
@@ -302,12 +307,13 @@ bool CalibrationModule::calibrate(){
         for( j = 0; j < canvas.rows; j += 16 )
             line(canvas, Point(0, j), Point(canvas.cols, j), Scalar(0, 150, 0), 1, 8);
 
-		imshow(Settings::RECTIFIED, canvas);
+		calibratingDialog->resize(canvas.size().width, canvas.size().height);
+		calibratingDialog->showImage(canvas);
 
         char c = (char)waitKey(5000);
         if( c == 'q' || c == 'Q' )
             break;
     }
-	destroyWindow(Settings::RECTIFIED);
+	delete calibratingDialog;
 	return true;
 }
