@@ -1,6 +1,8 @@
 #include "calibrationmodule.hpp"
 
 #include <sstream>
+#include <QVBoxLayout>
+#include <QPushButton>
 
 using namespace std;
 using namespace cv;
@@ -17,13 +19,49 @@ CalibrationModule::~CalibrationModule(){
 
 }
 
-void CalibrationModule::init(Settings * sets, Size theBoardSize, int pairs){
+void CalibrationModule::init(Settings * sets, QDialog * dial, Size theBoardSize, int pairs){
 	settings = sets;
 	maxPairs = pairs;
 	boardSize = theBoardSize;
 
 	blackOne = Mat(Settings::CAM_SIZE, CV_8U, Scalar(0));
+	dialog = dial;
+	initWindow();
 }
+
+
+void CalibrationModule::initWindow(){
+	dialog->setWindowTitle("Kalibracja");
+	
+	QVBoxLayout * layout = new QVBoxLayout(dialog);
+
+	calibrateButton = new QPushButton("Kalibruj", dialog);
+	connect(calibrateButton,	SIGNAL(clicked()),
+			this,				SLOT(startCalibration()));
+
+	loadCalibrationButton = new QPushButton("Wczytaj skalibrowane parametry", dialog);
+	connect(loadCalibrationButton,	SIGNAL(clicked()),
+			this,					SLOT(loadCalibration()));
+
+	layout->addWidget(calibrateButton);
+	layout->addWidget(loadCalibrationButton);
+
+	dialog->setLayout(layout);
+	dialog->move(10,20);
+	dialog->setMinimumWidth(200);
+	dialog->adjustSize();
+}
+
+
+void CalibrationModule::startCalibration(){
+	settings->state = Settings::CALIBRATION;
+	dialog->hide();
+}
+
+void CalibrationModule::loadCalibration(){
+
+}
+
 
 
 void CalibrationModule::addImages(IplImage * frame1, IplImage * frame2){
@@ -45,8 +83,6 @@ void CalibrationModule::addImages(IplImage * frame1, IplImage * frame2){
 	++counter;
 
 	if(counter*samplesTime == maxPairs){
-		
-		settings->showOverlay(string("Kalibracja rozpoczeta..."));
 		if(calibrate())
 			settings->state = Settings::AFTER_CALIBRATION;
 		else
@@ -58,6 +94,7 @@ void CalibrationModule::clearCalibrationData(){
 	camImages.clear();
 	counter = 0;
 	settings->state = Settings::BEFORE_CALIBRATION;
+	dialog->show();
 }
 
 
@@ -135,14 +172,10 @@ bool CalibrationModule::calibrate(){
 	float squareSize = 1.0;
 	numImages = j;
 	if(numImages < 2){
-		settings->showOverlay(string("Blad: za malo obrazow do przeprowadzenia kalibracji"), Settings::CORNERS);
 		waitKey(1000);
 		destroyWindow(Settings::CORNERS);
 		return false;
 	}else{
-		ostringstream ss;
-		ss << "Udalo sie odnalezc " << j << " par";
-		settings->showOverlay(ss.str(), Settings::CORNERS);
 		waitKey(1000);
 		destroyWindow(Settings::CORNERS);
 	}

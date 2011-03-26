@@ -30,6 +30,7 @@ void StereoMatchingSGBM::init(){
 	Property * prop = new Property("Minimum disparity", 0, Property::INT);
 	prop->minValue = -50;
 	prop->maxValue = 50;
+	prop->step = 5;
 	properties.push_back(prop);
 
 
@@ -41,7 +42,7 @@ void StereoMatchingSGBM::init(){
 		values[i] = 16*i;
 
 	prop->minValue = 0;
-	prop->maxValue = max-1;
+	prop->maxValue = max;
 	prop->tableValues = values;
 	properties.push_back(prop);
 
@@ -56,7 +57,7 @@ void StereoMatchingSGBM::init(){
 		values2[i] = defValues[i];
 
 	prop->minValue = 0;
-	prop->maxValue = max-1;
+	prop->maxValue = max;
 	prop->tableValues = values2;
 	properties.push_back(prop);
 
@@ -79,18 +80,19 @@ void StereoMatchingSGBM::init(){
 	prop = new Property("Speckle window size", 400, Property::INT);
 	prop->minValue = 0;
 	prop->maxValue = 500;
+	prop->step = 50;
 	properties.push_back(prop);
 
 
 	//6
-	prop = new Property("Speckle range", 16, Property::DISCRETE);
+	prop = new Property("Speckle range", 1, Property::DISCRETE);
 	max = 4;
 	int * values3 = new int[max];
 	for(int i = 0; i < max; ++i)
 		values3[i] = 16*i;
 
 	prop->minValue = 0;
-	prop->maxValue = max-1;
+	prop->maxValue = max;
 	prop->tableValues = values;
 	properties.push_back(prop);
 
@@ -115,14 +117,14 @@ void StereoMatchingSGBM::applyAllParametres(){
 	changeProperties();
 
 	sgbm.preFilterCap			= properties[I_preFilterCap]->getValue();
-    sgbm.SADWindowSize			= properties[I_SADWindowSize]->getValue();
+	sgbm.SADWindowSize			= properties[I_SADWindowSize]->tableValues[properties[I_SADWindowSize]->getValue()];
     sgbm.P1						= 16*sgbm.SADWindowSize*sgbm.SADWindowSize;
     sgbm.P2						= 64*sgbm.SADWindowSize*sgbm.SADWindowSize;
     sgbm.minDisparity			= properties[I_minDisparity]->getValue();
-	sgbm.numberOfDisparities	= properties[I_numberOfDisparities]->getValue();
+	sgbm.numberOfDisparities	= properties[I_numberOfDisparities]->tableValues[properties[I_numberOfDisparities]->getValue()];
     sgbm.uniquenessRatio		= properties[I_uniquenessRatio]->getValue();
     sgbm.speckleWindowSize		= properties[I_speckleWindowSize]->getValue();
-    sgbm.speckleRange			= properties[I_speckleRange]->getValue();
+	sgbm.speckleRange			= properties[I_speckleRange]->tableValues[properties[I_speckleRange]->getValue()];
     sgbm.disp12MaxDiff			= properties[I_disp12MaxDiff]->getValue();
     sgbm.fullDP					= (bool)properties[I_fullDP]->getValue();
 }

@@ -4,26 +4,39 @@
 #include <cv.h>
 #include <vector>
 
+#include <QDialog>
+#include <QObject>
+
 #include "settings.hpp"
 #include "cameracalibration.hpp"
 
 #include <opencv2/calib3d/calib3d.hpp>
-#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
 
-class CalibrationModule{
+class CalibrationModule: public QObject{
+
+	Q_OBJECT
 
 public:
 	CalibrationModule();
 	~CalibrationModule();
 
-	void init(Settings * sets, cv::Size theBoardSize, int pairs = 15);
+	void init(Settings * sets, QDialog * dial, cv::Size theBoardSize, int pairs = 15);
 	void addImages(IplImage * frame1, IplImage * frame2);
+
+private slots:
+	void startCalibration();
+	void loadCalibration();
 
 private:
 	bool calibrate();
 	void clearCalibrationData();
+	void initWindow();
+
+	QDialog * dialog;
+	QPushButton * calibrateButton;
+	QPushButton * loadCalibrationButton;
 
 	Settings * settings;
 	int maxPairs;

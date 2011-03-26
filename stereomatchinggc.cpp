@@ -30,6 +30,7 @@ void StereoMatchingGC::init(){
 	Property * prop = new Property("Minimum disparity", 0, Property::INT);
 	prop->minValue = -50;
 	prop->maxValue = 50;
+	prop->step = 5;
 	properties.push_back(prop);
 
 
@@ -41,7 +42,7 @@ void StereoMatchingGC::init(){
 		values[i] = 16*i;
 
 	prop->minValue = 0;
-	prop->maxValue = max-1;
+	prop->maxValue = max;
 	prop->tableValues = values;
 	properties.push_back(prop);
 
@@ -75,7 +76,7 @@ void StereoMatchingGC::applyAllParametres(){
 	changeProperties();
 
     state->minDisparity			= properties[I_minDisparity]->getValue();
-	state->numberOfDisparities	= properties[I_numberOfDisparities]->getValue();
+	state->numberOfDisparities	= properties[I_numberOfDisparities]->tableValues[properties[I_numberOfDisparities]->getValue()];
 	state->Ithreshold			= properties[I_threshold]->getValue();
 	state->maxIters				= properties[I_maxIters]->getValue();
 	state->interactionRadius	= properties[I_interactionRadius]->getValue();

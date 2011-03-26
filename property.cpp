@@ -1,7 +1,8 @@
 #include "property.hpp"
 
+#include <stdio.h>
 
-Property::Property(std::string theName, int theValue, Property::TYPE theType):
+Property::Property(char * theName, int theValue, Property::TYPE theType):
 name(theName), 
 value(theValue),
 defaultValue(theValue),
@@ -11,7 +12,7 @@ type(theType){
 	valueToChange = value;
 	minValue = -1;
 	maxValue = -1;
-	changed = false;
+	step = 1;
 }
 
 
@@ -21,14 +22,12 @@ Property::~Property(){
 }
 
 
-	// getters
-std::string Property::getName(){
+// getters
+char * Property::getName(){
 	return name;
 }
 
 int	Property::getValue(){
-	if(type == DISCRETE && tableValues)
-		return tableValues[value];
 	return value;
 }
 
@@ -40,36 +39,33 @@ Property::TYPE Property::getType(){
 	return type;
 }
 
-bool Property::wasChanged(){
-	return changed;
-}
 
 void Property::changeValue(){
 	value = valueToChange;
-	changed = false;
 }
 
 	// setters
 
 void Property::setValueToChange(int newVal){
 	valueToChange = newVal;
-	changed = true;
 }
 
 void Property::setValueToChangeUp(){
-	++valueToChange;
-	changed = true;
+	if(type != BOOL){
+		++valueToChange;
+	}
 }
 
 void Property::setValueToChangeDown(){
-	--valueToChange;
-	changed = true;
+	if(type != BOOL){
+		--valueToChange;
+	}
 }
 
 void Property::setValueToDefault(){
 	valueToChange = defaultValue;
-	changed = true;
 }
+
 
 void Property::setTableValues(int * values){
 	tableValues = values;

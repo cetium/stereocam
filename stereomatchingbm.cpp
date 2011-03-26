@@ -32,24 +32,25 @@ void StereoMatchingBM::init(){
 	Property * prop = new Property("Minimum disparity", 0, Property::INT);
 	prop->minValue = -50;
 	prop->maxValue = 50;
+	prop->step = 5;
 	properties.push_back(prop);
 
 
 	//1
-	prop = new Property("Number of disparities", 2, Property::DISCRETE);
+	Property * prop2 = new Property("Number of disparities", 2, Property::DISCRETE);
 	int max = 4;
 	int * values = new int[max];
 	for(int i = 0; i < max; ++i)
 		values[i] = 16*i;
 
-	prop->minValue = 0;
-	prop->maxValue = max-1;
-	prop->tableValues = values;
-	properties.push_back(prop);
+	prop2->minValue = 0;
+	prop2->maxValue = max;
+	prop2->tableValues = values;
+	properties.push_back(prop2);
 
 
 	//2
-	prop = new Property("SAD window size", 6, Property::DISCRETE);
+	Property * prop3 = new Property("SAD window size", 6, Property::DISCRETE);
 	max = 8;
 	int defValues[8] = {1, 3, 5, 7, 9, 11, 21, 31};
 
@@ -57,10 +58,10 @@ void StereoMatchingBM::init(){
 	for(int i = 0; i < max; ++i)
 		values2[i] = defValues[i];
 
-	prop->minValue = 0;
-	prop->maxValue = max-1;
-	prop->tableValues = values2;
-	properties.push_back(prop);
+	prop3->minValue = 0;
+	prop3->maxValue = max;
+	prop3->tableValues = values2;
+	properties.push_back(prop3);
 
 	
 	//3
@@ -95,18 +96,19 @@ void StereoMatchingBM::init(){
 	prop = new Property("Speckle window size", 400, Property::INT);
 	prop->minValue = 0;
 	prop->maxValue = 500;
+	prop->step = 50;
 	properties.push_back(prop);
 
 
 	//8
-	prop = new Property("Speckle range", 16, Property::DISCRETE);
+	prop = new Property("Speckle range", 1, Property::DISCRETE);
 	max = 4;
 	int * values3 = new int[max];
 	for(int i = 0; i < max; ++i)
 		values3[i] = 16*i;
 
 	prop->minValue = 0;
-	prop->maxValue = max-1;
+	prop->maxValue = max;
 	prop->tableValues = values3;
 	properties.push_back(prop);
 
@@ -119,7 +121,7 @@ void StereoMatchingBM::init(){
 
 
 	//10
-	prop = new Property("Try smaller windows", 0, Property::INT);
+	prop = new Property("Try smaller windows", 0, Property::BOOL);
 	prop->minValue = 0;
 	prop->maxValue = 1;
 	properties.push_back(prop);
@@ -134,20 +136,25 @@ void StereoMatchingBM::applyAllParametres(){
 
 	bm.state->preFilterCap			= properties[I_preFilterCap]->getValue();
 	bm.state->preFilterSize 		= properties[I_preFilterSize]->getValue();
-    bm.state->SADWindowSize			= properties[I_SADWindowSize]->getValue();
+	bm.state->SADWindowSize			= properties[I_SADWindowSize]->tableValues[properties[I_SADWindowSize]->getValue()];
     bm.state->minDisparity			= properties[I_minDisparity]->getValue();
-	bm.state->numberOfDisparities	= properties[I_numberOfDisparities]->getValue();
+	bm.state->numberOfDisparities	= properties[I_numberOfDisparities]->tableValues[properties[I_numberOfDisparities]->getValue()];
     bm.state->uniquenessRatio		= properties[I_uniquenessRatio]->getValue();
 	bm.state->textureThreshold		= properties[I_textureThreshold]->getValue();
     bm.state->speckleWindowSize		= properties[I_speckleWindowSize]->getValue();
-    bm.state->speckleRange			= properties[I_speckleRange]->getValue();
+	bm.state->speckleRange			= properties[I_speckleRange]->tableValues[properties[I_speckleRange]->getValue()];
     bm.state->disp12MaxDiff			= properties[I_disp12MaxDiff]->getValue();
-    bm.state->trySmallerWindows		= properties[I_trySmallerWindows]->getValue();
+    bm.state->trySmallerWindows		= (bool)properties[I_trySmallerWindows]->getValue();
 }
 
 
 
 void StereoMatchingBM::exec(Mat & image1, Mat & image2, Mat & retImage){
+	if(propertiesChanged){
+		applyAllParametres();
+		propertiesChanged = false;
+	}
+
 	Mat disp;
 
 	bm(image1, image2, disp);

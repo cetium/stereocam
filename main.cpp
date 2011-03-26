@@ -15,8 +15,6 @@ int main(int argc, char *argv[])
 	MainThread mainThread;
 	mainThread.init(&dial);
 	mainThread.start();
-    
-	dial.setWindowTitle("Stereo dopasowanie");
 
 	return dial.exec();
 }
