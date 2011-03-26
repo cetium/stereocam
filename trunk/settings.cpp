@@ -35,8 +35,3 @@ Settings::~Settings(){
 bool Settings::settingsChanged(){
 	return false;
 }
-
-
-void Settings::showOverlay(string & text, string & window){
-	displayOverlay(window, text, 3000);
-}

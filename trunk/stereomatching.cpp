@@ -1,8 +1,9 @@
 #include "stereomatching.hpp"
 
 
-StereoMatching::StereoMatching(std::string theName): name(theName){
+StereoMatching::StereoMatching(char * theName): name(theName){
 	everyFrameGet = 1; // it means - every frame
+	propertiesChanged = false;
 }
 
 StereoMatching::~StereoMatching(){
@@ -15,16 +16,10 @@ StereoMatching::~StereoMatching(){
 	}
 }
 
-	
-	// list of properties
-boolean	StereoMatching::propetriesWereChanged(){
-	// check all properties if they were changed
-
-	bool changed = false;
-	for(int i = 0; i < properties.size(); ++i)
-		changed = changed || properties[i]->wasChanged();
-
-	return false;
+// ustawienie flagi, ze zmienily sie parametry
+// przy kolejnym wywolaniu exec zostana one wziete pod uwage
+void StereoMatching::setPropertiesWereChanged(){
+	propertiesChanged = true;
 }
 
 void StereoMatching::changeProperties(){
@@ -32,8 +27,6 @@ void StereoMatching::changeProperties(){
 	for(int i = 0; i < properties.size(); ++i)
 		properties[i]->changeValue();
 }
-
-
 
 	// setters
 void StereoMatching::setEveryFrameGet(int value){
@@ -45,6 +38,6 @@ int	StereoMatching::getEveryFrameGet(){
 	return everyFrameGet;
 }
 
-std::string StereoMatching::getName(){
+char * StereoMatching::getName(){
 	return name;
 }

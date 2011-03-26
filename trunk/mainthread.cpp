@@ -35,7 +35,7 @@ bool MainThread::init(CloseDialog * dialog){
 
 void MainThread::run(){
 
-	moveToThread(this);
+	//moveToThread(this);
 
 	while(opencvMain());
 }
@@ -55,7 +55,7 @@ bool MainThread::initCameras(){
 
 bool MainThread::initModules(){
 	stereoModule.init(&settings, mainDialog);
-	calibModule.init(&settings, Size(11, 8));
+	calibModule.init(&settings, mainDialog, Size(11, 8));
 	processModule.init(&settings);
 	return true;
 }
@@ -88,6 +88,7 @@ bool MainThread::opencvMain(){
 	if(settings.state == settings.CALIBRATION){
 		// kalibracja kamer
 		calibModule.addImages(frame1, frame2);
+		return true;
 	}
 	
 	IplImage * afterProcess1, * afterProcess2;
@@ -105,10 +106,5 @@ bool MainThread::opencvMain(){
 			disparity = stereoModule.match(afterProcess1, afterProcess2);
 	}
 
-	// sprawdzenie czy zmienily sie ustawienia
-	// jesli tak - no to apply
-	if(settings.settingsChanged()){
-		
-	}
 	return true;
 }

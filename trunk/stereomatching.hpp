@@ -9,16 +9,14 @@
 class StereoMatching
 {
 public:
-	StereoMatching(std::string theName);
+	StereoMatching(char * theName);
 	~StereoMatching();
 
 	// virtual functions
-	virtual void init() = 0;
 	virtual void exec(cv::Mat & image1, cv::Mat & image2, cv::Mat & retImage) = 0;
-	virtual void applyAllParametres() = 0;
 	
 	// list of properties
-	boolean		propetriesWereChanged();
+	void		setPropertiesWereChanged();
 	void		changeProperties();
 	
 	std::vector<Property *> properties;
@@ -29,10 +27,17 @@ public:
 	
 	// getters
 	int			getEveryFrameGet();
-	std::string getName();
+	char *		getName();
 
 protected:
-	std::string name;
+	virtual void init() = 0;
+	virtual void applyAllParametres() = 0;
+
+	bool		propertiesChanged;
+
+private:
+	char *		name;
 	int			everyFrameGet;
+
 };
 

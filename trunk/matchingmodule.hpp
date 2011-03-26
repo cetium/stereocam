@@ -5,6 +5,8 @@
 #include <QButtonGroup>
 #include <QObject>
 #include <QAbstractButton>
+#include <QLayout>
+#include <QPushButton>
 
 #include <cv.h>
 #include <vector>
@@ -15,6 +17,7 @@
 #include "stereomatchinggc.hpp"
 
 #include "settings.hpp"
+#include "property.hpp"
 
 
 class MatchingModule : public QObject
@@ -33,10 +36,11 @@ private:
 	void initWindows();
 	void initChooseWindow();
 
-	void showSettingsWindow();
+	void addGuiForProperty(QDialog * parent, QLayout * layout, Property * prop, QPushButton * button);
 
 	std::vector<StereoMatching *> algorithms;
 	std::vector<QDialog *> setsDialogs;
+	std::vector<QPushButton *> applyButtons;
 
 	QDialog * chooseDialog;
 	QButtonGroup * buttonGroup;
@@ -46,7 +50,8 @@ private:
 
 private slots:
 	void algorithmChanged(int id);
-	
+	void applyValues();
+	void enableButton(int);
 };
 
 #endif // MATCHINGMODULE_HPP

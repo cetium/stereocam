@@ -27,8 +27,6 @@ public:
 	static const int AFTER_CALIBRATION;
 	static const int MATCH;
 
-	void showOverlay(std::string & text, std::string & window = WIN1);
-
 	static cv::Size CAM_SIZE;
 	static std::string WIN1;
 	static std::string WIN2;
