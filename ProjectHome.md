@@ -1,0 +1,1 @@
+OpenCV project - stereovision with 2 cameras with an OpenGL window to display 3D vision from cameras. It's developed to recognize moving hands trajectory.
